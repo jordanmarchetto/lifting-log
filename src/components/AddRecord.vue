@@ -39,9 +39,8 @@ export default {
             this.loading = true;
             axios
                 .post('https://api.jmar.dev/lifting-log/exercise-records', this.newRecord)
-                .then(response => {
+                .then(() => {
                     console.log("call done, now emit something to parent")
-                    console.log(response)
                     this.newRecord = {};
                 })
                 .catch(error => {

@@ -1,6 +1,7 @@
 <template>
     <div id="app">
-        <Header title="Lifting Log" />
+        <Header title="Lifting Log" v-on:reload="fetchAllData" />
+    
         <main>
             <section v-if="!activeExercise">
                 <div v-if="loadingExercises" class="loading-screen">
@@ -10,15 +11,13 @@
                     <md-progress-spinner :md-diameter="100" :md-stroke="10" class="md-accent" md-mode="indeterminate"></md-progress-spinner>
                 </div>
                 <div v-else>
-                    <div>
+                    <div class="scrollable-exercises">
+                        <!-- list of exercises -->
                         <ExerciseRow v-for="exercise in exercises" v-bind:key="exercise.id" v-bind="exercise" v-on:show-details="showExerciseDetails" />
                     </div>
     
-                    <md-button class="md-icon-button md-dense md-raised md-accent" @click="fetchAllData">
-                        <md-icon>cached</md-icon>
-                    </md-button>
-                    <AddExercise />
-    
+                    <!-- add new exercise form -->
+                    <AddExercise v-on:exercise-added="updateExercises" />
                 </div>
                 <!-- end loading if/else -->
             </section>
@@ -31,7 +30,6 @@
                     <md-icon>backspace</md-icon>
                 </md-button>
             </section>
-    
     
         </main>
         <Footer />
@@ -48,17 +46,12 @@ import AddRecord from './components/AddRecord.vue'
 import ExerciseRow from './components/ExerciseRow.vue'
 import ExerciseDetails from './components/ExerciseDetails.vue'
 
-
 import "normalize.css"
 import 'vue-material/dist/vue-material.min.css'
 import 'vue-material/dist/theme/default.css'
 
-
-import { MdButton, MdIcon, MdProgress } from 'vue-material/dist/components'
-
-Vue.use(MdProgress)
-Vue.use(MdButton)
-Vue.use(MdIcon)
+import VueMaterial from 'vue-material'
+Vue.use(VueMaterial)
 
 export default {
     name: 'app',
@@ -71,11 +64,14 @@ export default {
         AddExercise
     },
     computed: {
+        //keeps a filtered list of exercise records based on the active exercise id
         activeExerciseRecords: function() {
             return this.exercises.find(e => e.id === this.activeExercise.id);
         },
     },
     methods: {
+        //get all of the data from the api
+        //runs in two api calls, since the api response is pretty slow
         fetchAllData: function() {
             console.log("fetching from api");
             this.loadingExercises = true;
@@ -101,17 +97,22 @@ export default {
                     this.loadingRecords = false
                     console.log("api call complete.")
                 });
-
         },
+        //show the details of the selected exercise
         showExerciseDetails: function(id) {
-            console.log("showing deetails: " + id)
             this.activeExercise = this.exercises.find(e => e.id === id);
-
         },
+        //push the new entry to the UI
         updateRecords: function(record) {
-            //new record received from AddExercise, make a deep copy
+            //new record received from AddRecord, make a deep copy
             const newRecord = JSON.parse(JSON.stringify(record))
             this.exerciseRecords.push(newRecord);
+        },
+        //push the new entry to the UI
+        updateExercises: function(exercise) {
+            //new exercise received from AddExercise, make a deep copy
+            const newExercise = JSON.parse(JSON.stringify(exercise))
+            this.exercises.push(newExercise);
         }
     },
     mounted: function() {
@@ -119,12 +120,11 @@ export default {
     },
     data: function() {
         return {
-            loadingExercises: true,
+            loadingExercises: true, //true/false - show spinner while api call running
             loadingRecords: false,
-            exercises: null,
-            exerciseRecords: null,
-            activeExercise: null
-
+            exercises: null, //list of all exercise names/types/etc
+            exerciseRecords: null, //list of all exercise records
+            activeExercise: null //current exercise to show
         }
     }
 }
@@ -134,7 +134,8 @@ export default {
 //customize the material components
 @import "~vue-material/dist/theme/engine"; // Import the theme engine
 @include md-register-theme("default", ( primary: md-get-palette-color(blue, 900), // The primary color of your application
-accent: md-get-palette-color(purple, 700) // The accent or secondary color
+accent: md-get-palette-color(purple, 700), // The accent or secondary color
+jj: md-get-palette-color(purple, 700) // The accent or secondary color
 ));
 @import "~vue-material/dist/theme/all"; // Apply the theme
 :root {
@@ -166,8 +167,13 @@ body {
     background-color: var(--gray);
 }
 
-.loading-screen{
-  padding: 2em;
+.scrollable-exercises {
+    max-height: 600px;
+    overflow-y: scroll;
+}
+
+.loading-screen {
+    padding: 2em;
 }
 
 a {

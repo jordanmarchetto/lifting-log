@@ -10,6 +10,10 @@
         <div v-else>
             no records found
         </div>
+
+        <h2>
+            delete exercise
+        </h2>
     </div>
 </template>
 

@@ -6,7 +6,7 @@
     </footer>
 </template>
 
-<script>
+<script lang="ts">
 export default {
     name: 'Footer',
     props: {
@@ -16,7 +16,6 @@ export default {
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 footer {
     border-top: 1px solid var(--gray);
