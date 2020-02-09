@@ -1,6 +1,6 @@
 <template>
     <div id="app">
-        <Header v-bind:title="APP_NAME" v-on:reload="fetchAllData" />
+        <Header v-bind:title="APP_NAME" v-on:reload="fetchAllData" v-bind:api_running="api_running" />
     
         <main>
             <section v-if="!activeExercise">
@@ -17,18 +17,15 @@
                     </div>
     
                     <!-- add new exercise form -->
-                    <AddExercise v-on:exercise-added="updateExercises" />
+                    <AddExercise v-on:exercise-added="updateExercises"  v-on:api-started="running_api=true" v-on:api-stopped="running_api=false" />
                 </div>
                 <!-- end loading if/else -->
             </section>
     
             <!-- show exercise details -->
             <section v-else>
-                <ExerciseDetails v-bind:exercise="activeExerciseRecords" v-bind:records="exerciseRecords" v-on:delete-exercise="deleteExercise" v-on:go-back="showExerciseDetails(null)" />
-                <AddRecord v-bind:exercise="exercises.find(e => e.id===activeExercise.id)" v-on:record-added="updateRecords" />
-                <md-button class="md-icon-button md-dense md-raised md-primary" @click="showExerciseDetails(null)">
-                    <md-icon>backspace</md-icon>
-                </md-button>
+                <ExerciseDetails v-bind:exercise="activeExerciseRecords" v-bind:records="exerciseRecords" v-on:delete-record="deleteRecord" v-on:delete-exercise="deleteExercise" v-on:go-back="showExerciseDetails(null)" />
+                <AddRecord v-bind:exercise="exercises.find(e => e.id===activeExercise.id)" v-on:record-added="updateRecords" v-on:delete-exercise="deleteExercise"  v-on:api-started="running_api=true" v-on:api-stopped="running_api=false" />
             </section>
     
         </main>
@@ -70,6 +67,9 @@ export default {
         },
         APP_NAME: function() {
             return process.env.VUE_APP_NAME;
+        },
+        api_running: function() {
+            return (this.loadingExercises || this.loadingRecords || this.running_api) ? true : false;
         }
     },
     methods: {
@@ -98,9 +98,10 @@ export default {
                 });
 
             console.log("fetching records api");
+            this.loadingRecords = true;
             axios
                 .get('https://api.jmar.dev/lifting-log/exercise-records')
-                .then(response => (this.exerciseRecords = response.data))
+                .then(response => (this.exerciseRecords = response.data.reverse()))
                 .catch(error => {
                     console.error(error)
                 })
@@ -117,7 +118,7 @@ export default {
         updateRecords: function(record) {
             //new record received from AddRecord, make a deep copy
             const newRecord = JSON.parse(JSON.stringify(record))
-            this.exerciseRecords.push(newRecord);
+            this.exerciseRecords.unshift(newRecord);
         },
         //push the new entry to the UI
         updateExercises: function(exercise) {
@@ -129,6 +130,10 @@ export default {
         deleteExercise: function(ex) {
             this.showExerciseDetails(null);
             this.exercises = this.exercises.filter(e => e.id !== ex);
+            if (process.env.VUE_APP_OFFLINE === "true") {
+                return;
+            }
+            this.running_api = true;
             axios
                 .delete('https://api.jmar.dev/lifting-log/exercises/' + ex)
                 .catch(error => {
@@ -136,9 +141,25 @@ export default {
                 })
                 .finally(() => {
                     console.log("api call complete.")
+                    this.running_api = false;
                 });
-
-
+        },
+        //ex is the id to delete
+        deleteRecord: function(rec) {
+            this.exerciseRecords = this.exerciseRecords.filter(r => r.id !== rec);
+            if (process.env.VUE_APP_OFFLINE === "true") {
+                return;
+            }
+            this.running_api = true;
+            axios
+                .delete('https://api.jmar.dev/lifting-log/exercise-records/' + rec)
+                .catch(error => {
+                    console.error(error);
+                })
+                .finally(() => {
+                    console.log("api call complete.")
+                    this.running_api = false;
+                });
         }
     },
     mounted: function() {
@@ -148,6 +169,7 @@ export default {
         return {
             loadingExercises: true, //true/false - show spinner while api call running
             loadingRecords: false,
+            running_api: false, //true/false - generic for any api call
             exercises: null, //array of all exercise names/types/etc
             exerciseRecords: null, //list of all exercise records
             activeExercise: null //current exercise to show
@@ -161,6 +183,9 @@ export default {
 @import "~vue-material/dist/theme/engine"; // Import the theme engine
 @include md-register-theme("default", ( primary: md-get-palette-color(blue, 900), // The primary color of your application
 accent: md-get-palette-color(purple, 700) // The accent or secondary color
+));
+@include md-register-theme("light", ( primary: md-get-palette-color(blue, 50), // The primary color of your application
+accent: md-get-palette-color(purple, 50) // The accent or secondary color
 ));
 @import "~vue-material/dist/theme/all"; // Apply the theme
 :root {
@@ -204,5 +229,8 @@ body {
 
 a {
     color: var(--secondary);
+    &:hover {
+        cursor: pointer;
+    }
 }
 </style>

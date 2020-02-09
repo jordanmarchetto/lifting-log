@@ -2,11 +2,16 @@
     <header>
         <div class='header-wrap'>
             <h1>{{ title }}</h1>
-            <md-button class="md-icon-button md-dense md-raised" @click="$emit('reload')">
-                <md-icon>cached</md-icon>
-            </md-button>
+            <slot v-if="!api_running">
+                <md-button class="md-icon-button md-dense md-raised" @click="$emit('reload')">
+                    <md-icon>cached</md-icon>
+                </md-button>
+            </slot>
     
         </div>
+        <slot v-if="api_running">
+            <md-progress-bar class="" md-mode="query" md-theme="light" ></md-progress-bar>
+        </slot>
     </header>
 </template>
 
@@ -14,7 +19,8 @@
 export default {
     name: 'Header',
     props: {
-        title: String
+        title: String,
+        api_running: Boolean
     }
 }
 </script>

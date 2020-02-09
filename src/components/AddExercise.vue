@@ -85,7 +85,6 @@ export default {
 
             //tell parent to add this exercise
             this.$emit("exercise-added", this.newExercise);
-            this.loading = true;
 
             //bail out if we're offline
             if (process.env.VUE_APP_OFFLINE === "true") {
@@ -93,7 +92,10 @@ export default {
                 this.loading = false
                 return;
             }
+
             //run api cmd
+            this.$emit("api-started");
+            this.loading = true;
             axios
                 .post('https://api.jmar.dev/lifting-log/exercises', this.newExercise)
                 .then(() => {
@@ -105,6 +107,7 @@ export default {
                 })
                 .finally(() => {
                     this.loading = false
+                    this.$emit("api-stopped");
                 })
         },
         toggleAddExerciseRow() {
@@ -121,7 +124,7 @@ export default {
 
 <style scoped lang="scss">
 .add-excercise-wrap {
-    background-color: white;
+    background-color: var(--light-gray);
     border-top: 1px solid var(--dark-gray);
     padding: 0 1em;
     position: relative;
