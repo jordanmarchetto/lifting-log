@@ -39,7 +39,7 @@
                 <div class="md-layout md-gutter md-layout-item md-size-100">
                     <div class="md-layout-item md-xsmall-size-100 md-size-45">
                         <md-field>
-                            <label>Rest Time</label>
+                            <label>Rest Time/Interval</label>
                             <md-input v-model="newExercise.rest_time" type="number" placeholder="90 seconds"></md-input>
                         </md-field>
                     </div>
