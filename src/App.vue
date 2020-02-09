@@ -17,15 +17,16 @@
                     </div>
     
                     <!-- add new exercise form -->
-                    <AddExercise v-on:exercise-added="updateExercises"  v-on:api-started="running_api=true" v-on:api-stopped="running_api=false" />
+                    <AddExercise v-on:exercise-added="updateExercises" v-on:api-started="running_api=true" v-on:api-stopped="running_api=false" />
                 </div>
                 <!-- end loading if/else -->
             </section>
     
             <!-- show exercise details -->
             <section v-else>
+                <Timer v-bind:value="timer_value" v-if="timerRunning"/>
                 <ExerciseDetails v-bind:exercise="activeExerciseRecords" v-bind:records="exerciseRecords" v-on:delete-record="deleteRecord" v-on:delete-exercise="deleteExercise" v-on:go-back="showExerciseDetails(null)" />
-                <AddRecord v-bind:exercise="exercises.find(e => e.id===activeExercise.id)" v-on:record-added="updateRecords" v-on:delete-exercise="deleteExercise"  v-on:api-started="running_api=true" v-on:api-stopped="running_api=false" />
+                <AddRecord v-bind:exercise="exercises.find(e => e.id===activeExercise.id)" v-on:record-added="updateRecords" v-on:delete-exercise="deleteExercise" v-on:api-started="running_api=true" v-on:api-stopped="running_api=false" />
             </section>
     
         </main>
@@ -42,6 +43,7 @@ import AddExercise from './components/AddExercise.vue'
 import AddRecord from './components/AddRecord.vue'
 import ExerciseRow from './components/ExerciseRow.vue'
 import ExerciseDetails from './components/ExerciseDetails.vue'
+import Timer from './components/Timer.vue'
 
 import "normalize.css"
 import 'vue-material/dist/vue-material.min.css'
@@ -58,6 +60,7 @@ export default {
         ExerciseRow,
         ExerciseDetails,
         AddRecord,
+        Timer,
         AddExercise
     },
     computed: {
@@ -70,6 +73,13 @@ export default {
         },
         api_running: function() {
             return (this.loadingExercises || this.loadingRecords || this.running_api) ? true : false;
+        },
+        timer_value: function() {
+            if (this.timerRunning) {
+                return this.timerCurrent.toString();
+            } else {
+                return '';
+            }
         }
     },
     methods: {
@@ -119,6 +129,10 @@ export default {
             //new record received from AddRecord, make a deep copy
             const newRecord = JSON.parse(JSON.stringify(record))
             this.exerciseRecords.unshift(newRecord);
+            console.log("got:");
+            console.log(newRecord);
+            console.log(this.exercises.find(e => e.id === newRecord.exercise));
+            this.startTimer(this.exercises.find(e => e.id === newRecord.exercise).rest_time);
         },
         //push the new entry to the UI
         updateExercises: function(exercise) {
@@ -160,13 +174,33 @@ export default {
                     console.log("api call complete.")
                     this.running_api = false;
                 });
+        },
+        startTimer: async function(value) {
+            this.timerCurrent = value;
+            this.timerRunning = true;
+            const sleep = m => new Promise(r => setTimeout(r, m));
+
+
+            while (this.timerCurrent > 0) {
+                if (this.timerCurrent > 60) {
+                    this.timerCurrent = this.timerCurrent - 1;
+                    await sleep(1000);
+                } else {
+                    this.timerCurrent = (this.timerCurrent - 0.01).toFixed(2);
+                    await sleep(10);
+                }
+            }
+            this.timerRunning = false;
         }
+
     },
     mounted: function() {
         this.fetchAllData();
     },
     data: function() {
         return {
+            timerCurrent: 0, //value of the timer
+            timerRunning: false, //if the timer is running
             loadingExercises: true, //true/false - show spinner while api call running
             loadingRecords: false,
             running_api: false, //true/false - generic for any api call

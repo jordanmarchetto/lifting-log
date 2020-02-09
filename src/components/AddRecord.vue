@@ -152,6 +152,7 @@ export default {
         padding: 1em;
         display: flex;
         justify-content: space-between;
+        align-items: center;
         h2 {
             margin: 0;
         }
