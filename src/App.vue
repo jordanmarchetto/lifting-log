@@ -1,6 +1,6 @@
 <template>
     <div id="app">
-        <Header title="Lifting Log" v-on:reload="fetchAllData" />
+        <Header v-bind:title="APP_NAME" v-on:reload="fetchAllData" />
     
         <main>
             <section v-if="!activeExercise">
@@ -24,7 +24,7 @@
     
             <!-- show exercise details -->
             <section v-else>
-                <ExerciseDetails v-bind:exercise="activeExerciseRecords" v-bind:records="exerciseRecords" />
+                <ExerciseDetails v-bind:exercise="activeExerciseRecords" v-bind:records="exerciseRecords" v-on:delete-exercise="deleteExercise" v-on:go-back="showExerciseDetails(null)" />
                 <AddRecord v-bind:exercise="exercises.find(e => e.id===activeExercise.id)" v-on:record-added="updateRecords" />
                 <md-button class="md-icon-button md-dense md-raised md-primary" @click="showExerciseDetails(null)">
                     <md-icon>backspace</md-icon>
@@ -68,11 +68,22 @@ export default {
         activeExerciseRecords: function() {
             return this.exercises.find(e => e.id === this.activeExercise.id);
         },
+        APP_NAME: function() {
+            return process.env.VUE_APP_NAME;
+        }
     },
     methods: {
         //get all of the data from the api
         //runs in two api calls, since the api response is pretty slow
         fetchAllData: function() {
+            if (process.env.VUE_APP_OFFLINE === "true") {
+                console.log(process.env.VUE_APP_EXERCISE_DATA);
+                this.exercises = JSON.parse(process.env.VUE_APP_EXERCISE_DATA);
+                this.exerciseRecords = JSON.parse(process.env.VUE_APP_RECORD_DATA);
+                this.loadingExercises = false;
+                this.loadingRecords = false;
+                return;
+            }
             console.log("fetching from api");
             this.loadingExercises = true;
             axios
@@ -113,6 +124,21 @@ export default {
             //new exercise received from AddExercise, make a deep copy
             const newExercise = JSON.parse(JSON.stringify(exercise))
             this.exercises.push(newExercise);
+        },
+        //ex is the id to delete
+        deleteExercise: function(ex) {
+            this.showExerciseDetails(null);
+            this.exercises = this.exercises.filter(e => e.id !== ex);
+            axios
+                .delete('https://api.jmar.dev/lifting-log/exercises/' + ex)
+                .catch(error => {
+                    console.error(error);
+                })
+                .finally(() => {
+                    console.log("api call complete.")
+                });
+
+
         }
     },
     mounted: function() {
@@ -122,7 +148,7 @@ export default {
         return {
             loadingExercises: true, //true/false - show spinner while api call running
             loadingRecords: false,
-            exercises: null, //list of all exercise names/types/etc
+            exercises: null, //array of all exercise names/types/etc
             exerciseRecords: null, //list of all exercise records
             activeExercise: null //current exercise to show
         }
@@ -134,8 +160,7 @@ export default {
 //customize the material components
 @import "~vue-material/dist/theme/engine"; // Import the theme engine
 @include md-register-theme("default", ( primary: md-get-palette-color(blue, 900), // The primary color of your application
-accent: md-get-palette-color(purple, 700), // The accent or secondary color
-jj: md-get-palette-color(purple, 700) // The accent or secondary color
+accent: md-get-palette-color(purple, 700) // The accent or secondary color
 ));
 @import "~vue-material/dist/theme/all"; // Apply the theme
 :root {
@@ -148,6 +173,7 @@ jj: md-get-palette-color(purple, 700) // The accent or secondary color
     --light-gray: #F5F5F6;
     --gray: #E1E2E1;
     --dark-gray: #ccc;
+    --error: #9c4dcc;
 }
 
 #app {

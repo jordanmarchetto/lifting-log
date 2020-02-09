@@ -36,6 +36,11 @@ export default {
             this.newRecord.exercise = this.exercise.id;
             console.log(this.newRecord);
             this.$emit("record-added", this.newRecord);
+            if (process.env.VUE_APP_OFFLINE === "true") {
+                this.newRecord = {};
+                this.loading = false
+                return;
+            }
             this.loading = true;
             axios
                 .post('https://api.jmar.dev/lifting-log/exercise-records', this.newRecord)

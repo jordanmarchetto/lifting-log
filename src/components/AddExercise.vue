@@ -65,7 +65,7 @@
     </div>
 </template>
 
-<script>
+<script lang="ts">
 import axios from 'axios'
 export default {
     name: 'AddExercise',
@@ -87,6 +87,12 @@ export default {
             this.$emit("exercise-added", this.newExercise);
             this.loading = true;
 
+            //bail out if we're offline
+            if (process.env.VUE_APP_OFFLINE === "true") {
+                this.newExercise = {};
+                this.loading = false
+                return;
+            }
             //run api cmd
             axios
                 .post('https://api.jmar.dev/lifting-log/exercises', this.newExercise)

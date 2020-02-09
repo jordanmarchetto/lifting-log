@@ -1,39 +1,79 @@
 <template>
     <div>
-        <h2>Details</h2>
-        <p>Exercise we're looking at: {{ exercise.id }} - {{exercise.name}} - {{exercise.rest_time}} seconds </p>
-        <div v-if="relevantRecords && relevantRecords.length>0">
-            <div v-for="entry in relevantRecords" v-bind:key="entry.id">
-                ex: {{entry.exercise}}, created_at: {{entry.created_at}}, reps: {{entry.reps}}, weight: {{entry.weight}}
+        <div class="title-bar">
+    
+            <div class="title-wrap">
+                <md-button class="md-icon-button md-dense" @click="$emit('go-back')">
+                    <md-icon>chevron_left</md-icon>
+                </md-button>
+                <h2>{{exercise.name}}</h2>
+                <span v-html="notesText"></span>
             </div>
+            <md-button class="md-icon-button md-dense md-accent" disabled>
+                <md-icon v-if="exercise.type==='endurance'" class="md-accent">directions_run</md-icon>
+                <md-icon v-else class="md-accent">fitness_center</md-icon>
+            </md-button>
+    
+        </div>
+        <div v-if="relevantRecords && relevantRecords.length>0" class="record-list">
+            <SetDetails v-for="entry in relevantRecords" v-bind:key="entry.id" v-bind:set="entry" />
         </div>
         <div v-else>
-            no records found
+            No records found.
         </div>
-
-        <h2>
-            delete exercise
-        </h2>
+        <div class="delete-row">
+            <a href @click="deleteExercise" class="delete">Delete Exercise</a>
+        </div>
+    
     </div>
 </template>
 
-<script>
+<script lang="ts">
+import SetDetails from './SetDetails.vue'
+
 export default {
     name: 'ExerciseDetails',
     props: {
         exercise: Object,
         records: Array
     },
+    components: {
+        SetDetails
+    },
     computed: {
+        //filter out all the records that aren't for this exercise
         relevantRecords: function() {
-            console.log("only keeping entries that matter");
             let recs = this.records.filter(record => record.exercise === this.exercise.id);
             return recs;
-
+        },
+        //turn time into a sentence: XX seconds rest
+        restText: function() {
+            let time = parseInt(this.exercise.rest_time);
+            if (time && time > 0) {
+                return time + " seconds rest";
+            } else {
+                return '&nbsp;';
+            }
+        },
+        //wrap notes in ()'s
+        notesText: function() {
+            if (this.exercise.notes) {
+                return "(" + this.exercise.notes + ")";
+            } else {
+                return '&nbsp;';
+            }
         }
+
     },
     mounted() {},
-    methods: {},
+    methods: {
+        //confirm, then tell the parent
+        deleteExercise: function() {
+            if (confirm("Are you sure?")) {
+                this.$emit("delete-exercise", this.exercise.id);
+            }
+        }
+    },
     data: function() {
         return {}
     }
@@ -41,7 +81,27 @@ export default {
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+<style scoped lang="scss">
+.title-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1em;
+    .title-wrap {
+        display: flex;
+        align-items: center;
+        h2 {
+            margin: 0 0.5em;
+            display: inline;
+        }
+    }
+}
 
+.delete-row {
+    text-align: right;
+    padding: 0 1em;
+    a.delete {
+        color: var(--error);
+    }
+}
 </style>
