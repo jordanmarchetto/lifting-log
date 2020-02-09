@@ -30,10 +30,24 @@
                     </slot>
     
                     <slot v-else>
-                        <div class="md-layout-item md-xsmall-size-100 md-size-90">
+                        <div class="md-layout-item md-xsmall-size-100 md-size-45">
                             <md-field>
                                 <label for="type">Distance/Time</label>
                                 <md-input v-model="newRecord.distance" type="number" placeholder="Distance/Time"></md-input>
+                            </md-field>
+                        </div>
+                        <div class="md-layout-item md-xsmall-size-100 md-size-45">
+                            <md-field>
+                                <label for="unit">Unit</label>
+                                <md-select v-model="newRecord.unit" name="unit" id="unit">
+                                    <md-option value="m">m</md-option>
+                                    <md-option value="km">km</md-option>
+                                    <md-option value="mi">mi</md-option>
+                                    <md-option value="yd">yd</md-option>
+                                    <md-option value="s">s</md-option>
+                                    <md-option value="min">min</md-option>
+                                    <md-option value="hr">hr</md-option>
+                                </md-select>
                             </md-field>
                         </div>
                     </slot>

@@ -16,16 +16,16 @@
     
         </div>
         <div v-if="relevantRecords && relevantRecords.length>0" class="record-list">
-            <SetDetails v-for="entry in relevantRecords" v-bind:key="entry.id" v-bind:set="entry" v-on:delete-record="$emit('delete-record', entry.id)" />
+            <SetDetails v-for="entry in relevantRecords" v-bind:key="entry.id" v-bind:set="entry" v-bind:exercise="exercise" v-on:delete-record="$emit('delete-record', entry.id)" />
         </div>
         <div v-else>
             No records found.
         </div>
         <!--
-                <div class="delete-row">
-                    <a href @click="deleteExercise" class="delete">Delete Exercise</a>
-                    </div>
-                    -->
+                    <div class="delete-row">
+                        <a href @click="deleteExercise" class="delete">Delete Exercise</a>
+                        </div>
+                        -->
     
     </div>
 </template>

@@ -5,12 +5,19 @@
                 <span class="date">{{date}}</span>
                 <span class="time">{{time}}</span>
             </div>
-            <div class="center col">
-                <span class="reps"><span class="num">{{set.reps}}</span> reps</span>
-            </div>
-            <div class="right col">
-                <span class="weight"><span class="num">{{set.weight}}</span> lbs.</span>
-            </div>
+            <slot v-if="exercise.type==='weight'">
+                <div class="center col">
+                    <span class="reps"><span class="num">{{set.reps}}</span> reps</span>
+                </div>
+                <div class="right col">
+                    <span class="weight"><span class="num">{{set.weight}}</span> lbs.</span>
+                </div>
+            </slot>
+            <slot v-else>
+                <div class="right col">
+                    <span class="distance"><span class="num">{{set.distance}}</span> <span class="unit">{{unit}}</span></span>
+                </div>
+            </slot>
         </div>
         <div class="details" v-if="expanded">
             <md-button @click="$emit('delete-record')" class="md-accent">Delete Record</md-button>
@@ -22,6 +29,7 @@
 export default {
     name: 'SetDetails',
     props: {
+        exercise: Object,
         set: Object
     },
     computed: {
@@ -36,6 +44,9 @@ export default {
         },
         time: function() {
             return this.set.created_at.split(" ")[1];
+        },
+        unit: function(){
+            return this.set.unit;
         }
     },
     methods: {
@@ -84,13 +95,7 @@ export default {
         cursor: pointer;
         box-shadow: inset 0px 0px 0px 1px var(--dark-gray);
     }
-    .reps {
-        .num {
-            font-size: 2.5em;
-            font-weight: bold;
-        }
-    }
-    .weight {
+    .reps, .weight, .distance {
         .num {
             font-size: 2.5em;
             font-weight: bold;
