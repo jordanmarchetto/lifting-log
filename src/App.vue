@@ -24,12 +24,12 @@
     
             <!-- show exercise details -->
             <section v-else>
-                <Timer v-bind:value="timer_value" v-if="timerRunning"/>
+                <Timer v-bind:value="timer_value" v-if="timerRunning" />
                 <ExerciseDetails v-bind:exercise="activeExerciseRecords" v-bind:records="exerciseRecords" v-on:delete-record="deleteRecord" v-on:delete-exercise="deleteExercise" v-on:go-back="showExerciseDetails(null)" />
                 <AddRecord v-bind:exercise="exercises.find(e => e.id===activeExercise.id)" v-on:record-added="updateRecords" v-on:delete-exercise="deleteExercise" v-on:api-started="running_api=true" v-on:api-stopped="running_api=false" />
             </section>
-    
         </main>
+    
         <Footer />
     </div>
 </template>
@@ -87,14 +87,14 @@ export default {
         //runs in two api calls, since the api response is pretty slow
         fetchAllData: function() {
             if (process.env.VUE_APP_OFFLINE === "true") {
-                console.log(process.env.VUE_APP_EXERCISE_DATA);
                 this.exercises = JSON.parse(process.env.VUE_APP_EXERCISE_DATA);
                 this.exerciseRecords = JSON.parse(process.env.VUE_APP_RECORD_DATA);
                 this.loadingExercises = false;
                 this.loadingRecords = false;
                 return;
             }
-            console.log("fetching from api");
+
+            //pull all exercises
             this.loadingExercises = true;
             axios
                 .get('https://api.jmar.dev/lifting-log/exercises')
@@ -104,10 +104,9 @@ export default {
                 })
                 .finally(() => {
                     this.loadingExercises = false;
-                    console.log("api call complete.")
                 });
 
-            console.log("fetching records api");
+            //pull all the exercise records
             this.loadingRecords = true;
             axios
                 .get('https://api.jmar.dev/lifting-log/exercise-records')
@@ -117,7 +116,6 @@ export default {
                 })
                 .finally(() => {
                     this.loadingRecords = false
-                    console.log("api call complete.")
                 });
         },
         //show the details of the selected exercise
@@ -129,10 +127,8 @@ export default {
             //new record received from AddRecord, make a deep copy
             const newRecord = JSON.parse(JSON.stringify(record))
             this.exerciseRecords.unshift(newRecord);
-            console.log("got:");
-            console.log(newRecord);
-            console.log(this.exercises.find(e => e.id === newRecord.exercise));
             this.startTimer(this.exercises.find(e => e.id === newRecord.exercise).rest_time);
+            this.fetchAllData();
         },
         //push the new entry to the UI
         updateExercises: function(exercise) {
@@ -142,8 +138,11 @@ export default {
         },
         //ex is the id to delete
         deleteExercise: function(ex) {
+            //go back to list of exercises, remove the one that we deleted
             this.showExerciseDetails(null);
             this.exercises = this.exercises.filter(e => e.id !== ex);
+
+            //check for offline mode, and/or call the api
             if (process.env.VUE_APP_OFFLINE === "true") {
                 return;
             }
@@ -154,7 +153,6 @@ export default {
                     console.error(error);
                 })
                 .finally(() => {
-                    console.log("api call complete.")
                     this.running_api = false;
                 });
         },
@@ -175,13 +173,17 @@ export default {
                     this.running_api = false;
                 });
         },
+        //start a timer, doing this in App so that it persists throughout
         startTimer: async function(value) {
             this.timerCurrent = value;
             this.timerRunning = true;
+
+            //create a callable promise sleep that just times out for XX ms
             const sleep = m => new Promise(r => setTimeout(r, m));
 
-
+            //loop until timer gets to 0
             while (this.timerCurrent > 0) {
+                //change the output for the last minut
                 if (this.timerCurrent > 60) {
                     this.timerCurrent = this.timerCurrent - 1;
                     await sleep(1000);

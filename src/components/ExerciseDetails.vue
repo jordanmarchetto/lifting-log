@@ -22,10 +22,10 @@
             No records found.
         </div>
         <!--
-                    <div class="delete-row">
-                        <a href @click="deleteExercise" class="delete">Delete Exercise</a>
-                        </div>
-                        -->
+                        <div class="delete-row">
+                            <a href @click="deleteExercise" class="delete">Delete Exercise</a>
+                            </div>
+                            -->
     
     </div>
 </template>
@@ -65,7 +65,6 @@ export default {
                 return '&nbsp;';
             }
         }
-
     },
     mounted() {},
     methods: {
@@ -79,7 +78,6 @@ export default {
     data: function() {
         return {}
     }
-
 }
 </script>
 

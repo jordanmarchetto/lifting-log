@@ -80,6 +80,7 @@ export default {
     methods: {
         submitExerise() {
             //sanitize the name, make each word start with capital letter
+            //bench press => Bench Press
             const newName = this.newExercise.name.split(" ").map(w => w.slice(0, 1).toUpperCase() + w.slice(1, )).join(" ");
             this.newExercise.name = newName;
 

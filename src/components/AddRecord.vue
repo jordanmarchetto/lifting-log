@@ -5,11 +5,11 @@
             <md-progress-spinner :md-diameter="80" :md-stroke="10" class="md-accent" md-mode="indeterminate"></md-progress-spinner>
         </div>
     
-    
         <div class="top-row">
             <h2>Add Set</h2>
             <md-button @click="deleteExercise" class="md-accent">Delete Exercise</md-button>
         </div>
+
         <div class="form-wrap">
             <form novalidate class="md-layout" @submit.prevent="submitRecord">
                 <div class="md-layout md-gutter md-layout-item md-size-100">
@@ -60,8 +60,6 @@
                 </div>
             </form>
         </div>
-    
-    
     
     </div>
 </template>

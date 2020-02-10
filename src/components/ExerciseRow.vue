@@ -35,7 +35,7 @@ export default {
         restText: function() {
             let time = parseInt(this.rest_time);
             if (time && time > 0) {
-                let rest_interval_text = (this.type === "weight")?" seconds rest":" second interval";
+                let rest_interval_text = (this.type === "weight") ? " seconds rest" : " second interval";
                 return time + rest_interval_text;
             } else {
                 return '&nbsp;';

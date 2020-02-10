@@ -7,11 +7,12 @@
                     <md-icon>cached</md-icon>
                 </md-button>
             </slot>
-    
         </div>
+    
         <slot v-if="api_running">
-            <md-progress-bar class="" md-mode="query" md-theme="light" ></md-progress-bar>
+            <md-progress-bar class="" md-mode="query" md-theme="light"></md-progress-bar>
         </slot>
+    
     </header>
 </template>
 
