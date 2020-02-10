@@ -15,17 +15,17 @@
             </md-button>
     
         </div>
-        <div v-if="relevantRecords && relevantRecords.length>0" class="record-list">
+        <div v-if="relevantRecords && relevantRecords.length>0" class="record-list" id="record-list">
             <SetDetails v-for="entry in relevantRecords" v-bind:key="entry.id" v-bind:set="entry" v-bind:exercise="exercise" v-on:delete-record="$emit('delete-record', entry.id)" />
         </div>
-        <div v-else>
+        <div v-else class="empty-records">
             No records found.
         </div>
         <!--
-                        <div class="delete-row">
-                            <a href @click="deleteExercise" class="delete">Delete Exercise</a>
-                            </div>
-                            -->
+                            <div class="delete-row">
+                                <a href @click="deleteExercise" class="delete">Delete Exercise</a>
+                                </div>
+                                -->
     
     </div>
 </template>
@@ -100,6 +100,12 @@ export default {
 .record-list {
     max-height: 460px;
     overflow-y: scroll;
+}
+
+.empty-records {
+    background: white;
+    border: 1px solid var(--light-gray);
+    padding: 2em;
 }
 
 .delete-row {

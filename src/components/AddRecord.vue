@@ -123,7 +123,10 @@ export default {
                     this.loading = false
                     this.$emit("api-stopped");
                 })
-            return;
+
+            //scroll to the top
+            document.getElementById("record-list").scrollTo(0,0);
+            window.scrollTo(0,0);
         }
     }
 }
@@ -131,7 +134,7 @@ export default {
 
 <style scoped lang="scss">
 .add-record-wrap {
-    padding: 0 1em;
+    padding: 0 1em 1em 1em;
     position: relative;
     overflow: hidden;
     .loading-overlay {
