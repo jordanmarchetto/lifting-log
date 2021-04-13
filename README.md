@@ -1,5 +1,6 @@
 # lifting-log
 
+
 ## Project setup
 ```
 npm install
